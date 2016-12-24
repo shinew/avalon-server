@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>The Resistance: Avalon</title>
+  <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+  <script type="text/javascript" src="//cdn.socket.io/socket.io-1.4.5.js"></script>
+  <script type="text/javascript" charset="utf-8">
+    $(function() {
+      const socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+      let pid;
+
+      socket.on('connect', () => {
+        console.log('attempting connection');
+        socket.emit('request_pid');
+      });
+
+      socket.on('set_pid', (msg) => {
+        console.log('pid is: ', msg.pid);
+        pid = msg.pid;
+      });
+
+      socket.on('log', function(data) {
+        $('#log').append('<p>' + data.msg + '</p>');
+      });
+
+      $('form#submit').submit(() => {
+        socket.emit('submit', { msg: $('#action').val(), pid: pid });
+        $('form#submit').trigger('reset');
+        return false;
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>The Resistance: Avalon</h1>
+  <h2>Action:</h2>
+  <form id="submit" method="POST">
+    <textarea rows="1" cols="30" id="action"></textarea>
+    <input type="submit" value="Submit">
+  </form>
+  <h2>Messages:</h2>
+  <div id="log"></div>
+</body>
+</html>
